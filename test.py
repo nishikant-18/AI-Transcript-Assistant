@@ -24,7 +24,7 @@ transcript = transcribe_all(chunks, language=language)
 print("\n === TRANSCRIPT === \n")
 print(transcript)
 """
-
+"""
 from dotenv import load_dotenv
 
 # Load environment variables before importing core modules
@@ -168,3 +168,104 @@ print("\n" + "=" * 60)
 print(" PROCESSING COMPLETE")
 print("=" * 60)
 
+"""
+
+#test.py
+from dotenv import load_dotenv
+
+from transcriber import transcribe_all
+from audio import process_input
+from claim_verifier import (
+    extract_claims,
+    verify_claims,
+)
+
+load_dotenv()
+
+source = "https://youtu.be/r-vbm9Hifw0?si=Hrfp29bRfq1_hnKM"
+
+print("=" * 60)
+print("TESTING FULL CLAIM VERIFICATION PIPELINE")
+print("=" * 60)
+
+# --------------------------------------------------
+# 1. Process audio
+# --------------------------------------------------
+
+print("\n[1] Processing audio...")
+
+chunks = process_input(source)
+
+print(f"Audio chunks created: {len(chunks)}")
+
+
+# --------------------------------------------------
+# 2. Transcribe
+# --------------------------------------------------
+
+print("\n[2] Transcribing...")
+
+transcript = transcribe_all(
+    chunks,
+    language="english"
+)
+
+print("\nTranscription complete.")
+
+
+# --------------------------------------------------
+# 3. Extract factual claims
+# --------------------------------------------------
+
+print("\n[3] Extracting factual claims...")
+
+claims_text = extract_claims(transcript)
+
+print("\n" + "=" * 60)
+print("FACTUAL CLAIMS")
+print("=" * 60)
+
+print(claims_text)
+
+
+# --------------------------------------------------
+# 4. Verify claims using Tavily
+# --------------------------------------------------
+
+print("\n[4] Verifying claims using Tavily...")
+
+verification_results = verify_claims(claims_text)
+
+
+# --------------------------------------------------
+# 5. Display verification results
+# --------------------------------------------------
+
+print("\n" + "=" * 60)
+print("CLAIM VERIFICATION RESULTS")
+print("=" * 60)
+
+for i, result in enumerate(verification_results, start=1):
+
+    print(f"\n{'-' * 60}")
+    print(f"CLAIM {i}")
+    print("-" * 60)
+
+    print(f"\nClaim:")
+    print(result["claim"])
+
+    print("\nVerification:")
+    print(result["verification"])
+
+    print("\nSources:")
+
+    for j, source in enumerate(result["sources"], start=1):
+
+        print(f"\n  [{j}] {source['title']}")
+        print(f"      {source['url']}")
+        print(f"      {source['snippet'][:300]}...")
+
+
+print("\n" + "=" * 60)
+print("CLAIM VERIFICATION TEST COMPLETE")
+print("=" * 60)
